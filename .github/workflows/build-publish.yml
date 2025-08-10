@@ -95,27 +95,33 @@ jobs:
           set -euo pipefail
           FILE="${CHART_VALUES_FILE}"
 
-          # Ensure .image exists
+          echo "yq version: $(yq --version || true)"
+
+          # --- Step 0: One-time cleanup ---
+          sed -i 's#^[[:space:]]*repository:[[:space:]]*docker[[:space:]]\+pull[[:space:]]\+#repository: #g' "$FILE"
+
+          # --- Step 1: Ensure .image exists ---
           if ! yq e '.image' "$FILE" >/dev/null 2>&1; then
             yq e '.image = {}' -i "$FILE"
           fi
 
-          # Ensure subkeys exist
+          # --- Step 2: Ensure subkeys exist ---
           for key in repository tag pullPolicy digest; do
             if ! yq e ".image.$key" "$FILE" >/dev/null 2>&1; then
               yq e ".image.$key = \"\"" -i "$FILE"
             fi
           done
 
-          # Set values
+          # --- Step 3: Set clean values ---
           yq e ".image.repository = strenv(IMAGE_NAME)" -i "$FILE"
           yq e ".image.tag = strenv(TAG)" -i "$FILE"
           yq e ".image.pullPolicy = \"IfNotPresent\"" -i "$FILE"
           yq e ".image.digest = strenv(DIGEST)" -i "$FILE"
 
-          # Sanity: prevent "docker pull ..." in repository
-          if yq e '.image.repository' "$FILE" | grep -qi '^docker pull '; then
-            echo "ERROR: .image.repository must not include 'docker pull'." >&2
+          # --- Step 4: Final guard ---
+          REPO="$(yq e -r '.image.repository' "$FILE")"
+          if echo "$REPO" | grep -qE '(^docker[[:space:]]+pull|[[:space:]])'; then
+            echo "ERROR: .image.repository must be just the image reference, got: '$REPO'" >&2
             exit 1
           fi
 
@@ -142,7 +148,7 @@ jobs:
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
-          # Ensure we base from latest BASE branch (avoid detached HEAD from tag push)
+          # Ensure we base from latest BASE branch
           git fetch origin "$BASE" --depth=1
           git checkout -B "$BASE" "origin/$BASE"
 
@@ -163,5 +169,5 @@ jobs:
             git commit -m "chore(chart): bump image to ${{ steps.bump.outputs.tag }} @ ${{ steps.bump.outputs.digest }}"
           fi
 
-          # Push branch (switch to PAT if branch protection blocks bot pushes)
+          # Push branch
           git push origin "$BRANCH"
