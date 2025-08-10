@@ -99,6 +99,7 @@ jobs:
       - name: Create PR with changes
         uses: peter-evans/create-pull-request@v6
         with:
+          base: dev 
           commit-message: "chore(chart): bump image to ${{ steps.bump.outputs.tag }} @ ${{ steps.bump.outputs.digest }}"
           branch: chore/bump-helm-${{ steps.bump.outputs.tag }}
           title: "Bump Helm image to ${{ steps.bump.outputs.tag }}"
