@@ -3,7 +3,7 @@ name: Build and Push Docker (GHCR)
 on:
   push:
     branches: [ "branch" ]
-    tags: [ "v*", "release-*" ]
+ #   tags: [ "v*", "release-*" ]
   pull_request:
     branches: [ "branch" ]
 
