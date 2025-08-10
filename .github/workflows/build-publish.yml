@@ -96,21 +96,30 @@ jobs:
         env:
           IMAGE_NAME: ${{ env.IMAGE_NAME }}
 
-      - name: Create PR with changes
-        uses: peter-evans/create-pull-request@v6
-        with:
-          base: dev 
-          commit-message: "chore(chart): bump image to ${{ steps.bump.outputs.tag }} @ ${{ steps.bump.outputs.digest }}"
-          branch: chore/bump-helm-${{ steps.bump.outputs.tag }}
-          title: "Bump Helm image to ${{ steps.bump.outputs.tag }}"
-          body: |
-            This PR updates the Helm chart image to:
+    #   - name: Create PR with changes
+    #     uses: peter-evans/create-pull-request@v6
+    #     with:
+    #       base: dev 
+    #       commit-message: "chore(chart): bump image to ${{ steps.bump.outputs.tag }} @ ${{ steps.bump.outputs.digest }}"
+    #       branch: chore/bump-helm-${{ steps.bump.outputs.tag }}
+    #       title: "Bump Helm image to ${{ steps.bump.outputs.tag }}"
+    #       body: |
+    #         This PR updates the Helm chart image to:
 
-            - **repository**: `${{ env.IMAGE_NAME }}`
-            - **tag**: `${{ steps.bump.outputs.tag }}`
-            - **digest**: `${{ steps.bump.outputs.digest }}`
+    #         - **repository**: `${{ env.IMAGE_NAME }}`
+    #         - **tag**: `${{ steps.bump.outputs.tag }}`
+    #         - **digest**: `${{ steps.bump.outputs.digest }}`
 
-            Merged PR will trigger ArgoCD to sync the new image (digest-pinned).
-          labels: |
-            release
-            helm
+    #         Merged PR will trigger ArgoCD to sync the new image (digest-pinned).
+    #       labels: |
+    #         release
+    #         helm
+      - name: Commit and push branch
+        run: |
+          BRANCH="chore/bump-helm-${{ steps.bump.outputs.tag }}"
+          git checkout -b "$BRANCH"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "${{ env.CHART_VALUES_FILE }}"
+          git commit -m "chore(chart): bump image to ${{ steps.bump.outputs.tag }} @ ${{ steps.bump.outputs.digest }}"
+          git push origin "$BRANCH"
