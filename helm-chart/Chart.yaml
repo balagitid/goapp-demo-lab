@@ -1,0 +1,7 @@
+apiVersion: v2
+name: kubeapp
+description: A simple Go app that shows Kubernetes pod/node details
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+

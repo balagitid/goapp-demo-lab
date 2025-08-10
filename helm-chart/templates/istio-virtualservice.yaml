@@ -1,0 +1,23 @@
+{{- if .Values.istio.enabled }}
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: {{ include "kubeapp.fullname" . }}
+  labels:
+    {{- include "kubeapp.labels" . | nindent 4 }}
+spec:
+  hosts:
+    {{- toYaml .Values.istio.hosts | nindent 4 }}
+  gateways:
+    - {{ .Values.istio.gateway.namespace }}/{{ .Values.istio.gateway.name }}
+  http:
+    - match:
+        - uri:
+            prefix: {{ .Values.istio.pathPrefix | quote }}
+      route:
+        - destination:
+            host: {{ include "kubeapp.fullname" . }}
+            port:
+              number: {{ .Values.service.port }}
+{{- end }}
+

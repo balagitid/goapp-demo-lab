@@ -1,0 +1,73 @@
+replicaCount: 1
+
+image:
+  repository: your-dockerhub-user/kubeapp
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8080
+  targetPort: 8080
+
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 200m
+    memory: 256Mi
+
+
+podAnnotations: {}
+podLabels: {}
+
+env:
+  clusterName: "my-eks-cluster"
+  extra: [] # e.g. [{name: "FOO", value: "bar"}]
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+istio:
+  enabled: true
+  gateway:
+    name: kubeapp-gateway
+    namespace: istio-system
+  hosts:
+    - kubeapp.local
+  tls:
+    enabled: false         # set true if you attach a secret to the Gateway
+    credentialName: ""     # e.g. istio-ingressgateway-certs (for SIMPLE/TLS modes)
+  pathPrefix: /            # match prefix for VirtualService
+
+# -- Horizontal Pod Autoscaler
+hpa:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 5
+  # At least one metric is required when enabled
+  metrics:
+    cpu:
+      enabled: true
+      # target type "Utilization" with targetAverageUtilization
+      targetAverageUtilization: 70
+    memory:
+      enabled: false
+      targetAverageUtilization: 80
+  behavior: {} # optional autoscaling behavior (scaleUp/scaleDown)
+
+# -- Prometheus Operator ServiceMonitor
+serviceMonitor:
+  enabled: true
+  namespace: ""          # leave empty to create in release namespace
+  interval: 15s
+  scrapeTimeout: 10s
+  labels: {}             # extra labels to add to ServiceMonitor
+  annotations: {}
+  path: /
+  scheme: http
+  # Endpoint port must match the Service port name
+  portName: http

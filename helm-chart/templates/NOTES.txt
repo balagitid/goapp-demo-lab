@@ -1,0 +1,18 @@
+1) App name: {{ include "kubeapp.fullname" . }}
+
+2) Service:
+   - Type: {{ .Values.service.type }}
+   - Port: {{ .Values.service.port }}
+
+3) Istio:
+{{- if .Values.istio.enabled }}
+   - Gateway: {{ .Values.istio.gateway.namespace }}/{{ .Values.istio.gateway.name }}
+   - Hosts: {{ join ", " .Values.istio.hosts }}
+   - Path prefix: {{ .Values.istio.pathPrefix }}
+   Access via: http://<one-of-the-hosts>{{ .Values.istio.pathPrefix }}
+{{- else }}
+   Istio disabled. Port-forward for quick test:
+     kubectl port-forward svc/{{ include "kubeapp.fullname" . }} 8080:{{ .Values.service.port }}
+     open http://localhost:8080
+{{- end }}
+
