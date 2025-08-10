@@ -95,20 +95,26 @@ jobs:
           set -euo pipefail
           FILE="${CHART_VALUES_FILE}"
 
-          # Ensure image keys exist
-          yq -i '(.image //= {})' "$FILE"
-          yq -i '(.image.repository //= "")' "$FILE"
-          yq -i '(.image.tag //= "")' "$FILE"
-          yq -i '(.image.pullPolicy //= "IfNotPresent")' "$FILE"
-          yq -i '(.image.digest //= "")' "$FILE"
+          # Ensure .image exists
+          if ! yq e '.image' "$FILE" >/dev/null 2>&1; then
+            yq e '.image = {}' -i "$FILE"
+          fi
+
+          # Ensure subkeys exist
+          for key in repository tag pullPolicy digest; do
+            if ! yq e ".image.$key" "$FILE" >/dev/null 2>&1; then
+              yq e ".image.$key = \"\"" -i "$FILE"
+            fi
+          done
 
           # Set values
-          yq -i '.image.repository = strenv(IMAGE_NAME)' "$FILE"
-          yq -i '.image.tag = strenv(TAG)' "$FILE"
-          yq -i '.image.digest = strenv(DIGEST)' "$FILE"
+          yq e ".image.repository = strenv(IMAGE_NAME)" -i "$FILE"
+          yq e ".image.tag = strenv(TAG)" -i "$FILE"
+          yq e ".image.pullPolicy = \"IfNotPresent\"" -i "$FILE"
+          yq e ".image.digest = strenv(DIGEST)" -i "$FILE"
 
           # Sanity: prevent "docker pull ..." in repository
-          if yq '.image.repository' "$FILE" | grep -qi '^docker pull '; then
+          if yq e '.image.repository' "$FILE" | grep -qi '^docker pull '; then
             echo "ERROR: .image.repository must not include 'docker pull'." >&2
             exit 1
           fi
@@ -122,6 +128,9 @@ jobs:
           sed -n '1,200p' "${{ env.CHART_VALUES_FILE }}"
 
       - name: Prepare branch and push changes
+        env:
+          BASE_BRANCH: ${{ env.BASE_BRANCH }}
+          CHART_VALUES_FILE: ${{ env.CHART_VALUES_FILE }}
         run: |
           set -euo pipefail
 
@@ -156,6 +165,3 @@ jobs:
 
           # Push branch (switch to PAT if branch protection blocks bot pushes)
           git push origin "$BRANCH"
-        env:
-          BASE_BRANCH: ${{ env.BASE_BRANCH }}
-          CHART_VALUES_FILE: ${{ env.CHART_VALUES_FILE }}
