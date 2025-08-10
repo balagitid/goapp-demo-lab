@@ -13,7 +13,7 @@ permissions:
 env:
   IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/kubeapp
   CHART_VALUES_FILE: helm-chart/values.yaml
-  BASE_BRANCH: main
+  BASE_BRANCH: dev
 
 jobs:
   build-and-push:
