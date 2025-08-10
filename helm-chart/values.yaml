@@ -1,73 +1,184 @@
-replicaCount: 1
+name: Release image & bump Helm values
 
-image:
-  repository: docker pull ghcr.io/balagitid/kubeapp
-  tag: "latest"
-  pullPolicy: IfNotPresent
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
 
-service:
-  type: ClusterIP
-  port: 8080
-  targetPort: 8080
-
-
-resources:
-  requests:
-    cpu: 50m
-    memory: 64Mi
-  limits:
-    cpu: 200m
-    memory: 256Mi
-
-
-podAnnotations: {}
-podLabels: {}
+permissions:
+  contents: write
+  packages: write
 
 env:
-  clusterName: "my-eks-cluster"
-  extra: [] # e.g. [{name: "FOO", value: "bar"}]
+  IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/kubeapp
+  CHART_VALUES_FILE: helm-chart/values.yaml
+  BASE_BRANCH: dev
 
-nodeSelector: {}
-tolerations: []
-affinity: {}
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    outputs:
+      image-digest: ${{ steps.build.outputs.digest }}
+      image-tag: ${{ steps.vars.outputs.tag }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-istio:
-  enabled: true
-  gateway:
-    name: kubeapp-gateway
-    namespace: istio-system
-  hosts:
-    - kubeapp.local
-  tls:
-    enabled: false         # set true if you attach a secret to the Gateway
-    credentialName: ""     # e.g. istio-ingressgateway-certs (for SIMPLE/TLS modes)
-  pathPrefix: /            # match prefix for VirtualService
+      - name: Derive tag from ref
+        id: vars
+        run: |
+          TAG="${GITHUB_REF#refs/tags/}"
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
 
-# -- Horizontal Pod Autoscaler
-hpa:
-  enabled: true
-  minReplicas: 1
-  maxReplicas: 5
-  # At least one metric is required when enabled
-  metrics:
-    cpu:
-      enabled: true
-      # target type "Utilization" with targetAverageUtilization
-      targetAverageUtilization: 70
-    memory:
-      enabled: false
-      targetAverageUtilization: 80
-  behavior: {} # optional autoscaling behavior (scaleUp/scaleDown)
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
 
-# -- Prometheus Operator ServiceMonitor
-serviceMonitor:
-  enabled: true
-  namespace: ""          # leave empty to create in release namespace
-  interval: 15s
-  scrapeTimeout: 10s
-  labels: {}             # extra labels to add to ServiceMonitor
-  annotations: {}
-  path: /
-  scheme: http
-  # Endpoint port must match the Service port name
-  portName: http
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=${{ steps.vars.outputs.tag }}
+            type=sha,format=short
+
+      - name: Build and push (multi-arch)
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  bump-helm:
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Show BEFORE (debug)
+        run: |
+          echo "---- BEFORE (raw) ----"
+          nl -ba "${{ env.CHART_VALUES_FILE }}" || true
+
+      # Sanitize by deleting the existing (possibly broken) top-level `image:` block
+      # and writing a clean one with the new repo/tag/digest.
+      - name: Sanitize and overwrite image block
+        env:
+          IMAGE_NAME: ${{ env.IMAGE_NAME }}
+          TAG: ${{ needs.build-and-push.outputs.image-tag }}
+          DIGEST: ${{ needs.build-and-push.outputs.image-digest }}
+        run: |
+          set -euo pipefail
+          FILE="${CHART_VALUES_FILE}"
+
+          if [ ! -f "$FILE" ]; then
+            echo "ERROR: $FILE not found." >&2
+            exit 1
+          fi
+
+          # 1) Remove any existing top-level `image:` block (the block and its indented lines)
+          #    This is robust even if the current block is malformed.
+          TMP="$(mktemp)"
+          perl -0777 -pe 's/^image:\r?\n(?:^[ \t].*\r?\n)*//m' "$FILE" > "$TMP"
+          mv "$TMP" "$FILE"
+
+          # 2) Append a known-good image block
+          cat >> "$FILE" <<EOF
+
+image:
+  repository: ${IMAGE_NAME}
+  tag: ${TAG}
+  pullPolicy: IfNotPresent
+  digest: ${DIGEST}
+EOF
+
+          # 3) Quick normalization: ensure no stray "docker pull" text remains
+          sed -i 's#^[[:space:]]*repository:[[:space:]]*docker[[:space:]]\+pull[[:space:]]\+#repository: #g' "$FILE"
+
+      # Validate YAML and show the final image fields
+      - name: Validate values.yaml and show image fields
+        run: |
+          set -euo pipefail
+          FILE="${CHART_VALUES_FILE}"
+
+          # Install yq for validation
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/download/v4.47.1/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+          echo "yq version: $(yq --version)"
+
+          # Validate entire YAML
+          yq e '.' "$FILE" >/dev/null
+
+          echo "---- AFTER (raw) ----"
+          nl -ba "$FILE"
+
+          echo "---- Extracted image block ----"
+          yq e '.image' "$FILE"
+
+          # Guard: Make sure repository is clean (no spaces / no `docker pull`)
+          REPO="$(yq e -r '.image.repository' "$FILE")"
+          if echo "$REPO" | grep -qE '(^docker[[:space:]]+pull|[[:space:]])'; then
+            echo "ERROR: .image.repository must be just the image reference, got: '$REPO'" >&2
+            exit 1
+          fi
+
+      - name: Prepare branch and push changes
+        env:
+          BASE_BRANCH: ${{ env.BASE_BRANCH }}
+          CHART_VALUES_FILE: ${{ env.CHART_VALUES_FILE }}
+        run: |
+          set -euo pipefail
+
+          BASE="${BASE_BRANCH}"
+          BRANCH="chore/bump-helm-${{ needs.build-and-push.outputs.image-tag }}"
+          FILE="${CHART_VALUES_FILE}"
+
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+          # Ensure we base from latest BASE branch (avoid detached HEAD from tag push)
+          git fetch origin "$BASE" --depth=1
+          git checkout -B "$BASE" "origin/$BASE"
+
+          # Create or update the chore branch
+          if git ls-remote --exit-code --heads origin "$BRANCH" >/dev/null 2>&1; then
+            git fetch origin "$BRANCH" --depth=1
+            git checkout -B "$BRANCH" "origin/$BRANCH"
+            git rebase "origin/$BASE" || true
+          else
+            git checkout -b "$BRANCH"
+          fi
+
+          # Stage and commit only if changed
+          git add "$FILE"
+          if git diff --cached --quiet; then
+            echo "No changes to commit in $FILE (already up to date)."
+          else
+            git commit -m "chore(chart): bump image to ${{ needs.build-and-push.outputs.image-tag }} @ ${ {needs.build-and-push.outputs.image-digest} }"
+          fi
+
+          # Push branch (use PAT if your policy blocks bot pushes)
+          git push origin "$BRANCH"
