@@ -1,16 +1,13 @@
 replicaCount: 1
-
 image:
-  repository: docker pull ghcr.io/balagitid/kubeapp
-  tag: "latest"
+  repository: ghcr.io/balagitid/kubeapp
+  tag: ""
   pullPolicy: IfNotPresent
-
+  digest: ""
 service:
   type: ClusterIP
   port: 8080
   targetPort: 8080
-
-
 resources:
   requests:
     cpu: 50m
@@ -18,19 +15,14 @@ resources:
   limits:
     cpu: 200m
     memory: 256Mi
-
-
 podAnnotations: {}
 podLabels: {}
-
 env:
   clusterName: "my-eks-cluster"
   extra: [] # e.g. [{name: "FOO", value: "bar"}]
-
 nodeSelector: {}
 tolerations: []
 affinity: {}
-
 istio:
   enabled: true
   gateway:
@@ -39,10 +31,9 @@ istio:
   hosts:
     - kubeapp.local
   tls:
-    enabled: false         # set true if you attach a secret to the Gateway
-    credentialName: ""     # e.g. istio-ingressgateway-certs (for SIMPLE/TLS modes)
-  pathPrefix: /            # match prefix for VirtualService
-
+    enabled: false # set true if you attach a secret to the Gateway
+    credentialName: "" # e.g. istio-ingressgateway-certs (for SIMPLE/TLS modes)
+  pathPrefix: / # match prefix for VirtualService
 # -- Horizontal Pod Autoscaler
 hpa:
   enabled: true
@@ -58,14 +49,13 @@ hpa:
       enabled: false
       targetAverageUtilization: 80
   behavior: {} # optional autoscaling behavior (scaleUp/scaleDown)
-
 # -- Prometheus Operator ServiceMonitor
 serviceMonitor:
   enabled: true
-  namespace: ""          # leave empty to create in release namespace
+  namespace: "" # leave empty to create in release namespace
   interval: 15s
   scrapeTimeout: 10s
-  labels: {}             # extra labels to add to ServiceMonitor
+  labels: {} # extra labels to add to ServiceMonitor
   annotations: {}
   path: /
   scheme: http
