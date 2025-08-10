@@ -1,7 +1,7 @@
 replicaCount: 1
 
 image:
-  repository: your-dockerhub-user/kubeapp
+  repository: docker pull ghcr.io/balagitid/kubeapp
   tag: "latest"
   pullPolicy: IfNotPresent
 

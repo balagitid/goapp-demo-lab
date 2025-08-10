@@ -1,0 +1,115 @@
+name: Release image + bump Helm values
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write   # needed for PR commits
+  packages: write   # needed to push to GHCR
+  pull-requests: write
+
+env:
+  IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/kubeapp
+  CHART_VALUES_FILE: kubeapp/values.yaml   # path to your chart values file
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    outputs:
+      image-digest: ${{ steps.build.outputs.digest }}
+      image-tag: ${{ steps.vars.outputs.tag }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Derive tag from ref
+        id: vars
+        run: |
+          TAG="${GITHUB_REF#refs/tags/}"
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=${{ steps.vars.outputs.tag }}
+            type=sha,format=short
+
+      - name: Build and push (multi-arch)
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  bump-helm:
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install yq
+        uses: mikefarah/yq@v4.44.3
+
+      - name: Update Helm values.yaml (tag + digest)
+        id: bump
+        run: |
+          TAG='${{ needs.build-and-push.outputs.image-tag }}'
+          DIGEST='${{ needs.build-and-push.outputs.image-digest }}'
+          FILE='${{ env.CHART_VALUES_FILE }}'
+
+          # Ensure the fields exist, then set them
+          yq -i '.image.tag = strenv(TAG)' "$FILE"
+          yq -i '.image.digest = strenv(DIGEST)' "$FILE"
+          yq -i '.image.repository = strenv(IMAGE_NAME)' "$FILE"
+
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "digest=$DIGEST" >> $GITHUB_OUTPUT
+        env:
+          IMAGE_NAME: ${{ env.IMAGE_NAME }}
+
+      - name: Create PR with changes
+        uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: "chore(chart): bump image to ${{ steps.bump.outputs.tag }} @ ${{ steps.bump.outputs.digest }}"
+          branch: chore/bump-helm-${{ steps.bump.outputs.tag }}
+          title: "Bump Helm image to ${{ steps.bump.outputs.tag }}"
+          body: |
+            This PR updates the Helm chart image to:
+
+            - **repository**: `${{ env.IMAGE_NAME }}`
+            - **tag**: `${{ steps.bump.outputs.tag }}`
+            - **digest**: `${{ steps.bump.outputs.digest }}`
+
+            Merged PR will trigger ArgoCD to sync the new image (digest-pinned).
+          labels: |
+            release
+            helm
