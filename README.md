@@ -83,14 +83,12 @@ Support:
 
 ## 📫 Get in Touch
 
--  BalaSubramani  Kuppusamy
--  _Cloud Solution Architect | DevOps Engineer | Infrastructure Engineer_
-  
+-  **BalaSubramani  Kuppusamy**
+-  **_Cloud Solution Architect | DevOps Engineer | Infrastructure Engineer_**  
 📞 Schedule a Free 30-Minute Call: https://calendly.com/bala-kubelancer/30min
-
 🌐 Website: https://bala.kubelancer.com
-
 ✉️ Email: bala@kubelancer.com
+💼 LinkedIn: https://linkedin.com/in/bala-kubelancer
 
 
 ## My Expertise
