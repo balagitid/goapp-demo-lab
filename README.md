@@ -1,4 +1,5 @@
-# Deploy Simple Application in AWS EKS Kubernetes Cluster ( Manual - using CLI tools)
+# Deploy Simple Application in AWS EKS Kubernetes Cluster 
+> ( Manual - using CLI tools)
 
 ##  Overview
 
