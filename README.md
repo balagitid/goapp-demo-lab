@@ -5,21 +5,10 @@
 
 A hands-on project that demonstrates how to deploy simple application in AWS EKS Kubernetes cluster using the following stack:
 
-- **Infrastructure:** AWS Cloud
-- **Application:** Simple Go Application
+- Infrastructure: AWS Cloud
+- Application: Simple Go Application
 
-> Step by Step
-> Lab
-
-- [x] Hello
-
-      
-
-
-
-## Learning Objectives
-
-By completing this lab, you will learn how to:
+## By completing this lab, you will learn how to:
 
 - Create a Sample Application 
 - Create Dockerfile
@@ -34,9 +23,12 @@ By completing this lab, you will learn how to:
 - Configure DNS to access the Application 
 
 
-
 ## Architecture Diagram
 
+
+
+
+Support:
 
 
 
@@ -45,6 +37,13 @@ By completing this lab, you will learn how to:
 
 -  BalaSubramani  Kuppusamy
 -  _Cloud Solution Architect | DevOps Engineer | Infrastructure Engineer_
+  
+📞 Schedule a Free 30-Minute Call: https://calendly.com/bala-kubelancer/30min
+
+🌐 Website: https://bala.kubelancer.com
+
+✉️ Email: bala@kubelancer.com
+
 
 ## My Expertise
 
@@ -63,6 +62,8 @@ By completing this lab, you will learn how to:
 - Monitoring, Logging, Observability, Alerting by industry business suit products
 
 ## For Business:
+
+I am happy to assist in any capacity—from answering simple questions to delivering complex project implementations.
 
 - Book 30 mins Free Consulting [https://calendly.com/bala-kubelancer/30min]
 - Email: *bala@kubelancer.com*
