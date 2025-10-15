@@ -22,17 +22,46 @@ A hands-on project that demonstrates how to deploy simple application in AWS EKS
 - Install Cert Manager
 - Configure DNS to access the Application 
 
-### 🧭 Deployment Flow
+## Deployment Flow
 
-⏱️ **Step 1:** Create a Sample Application  
-📦 **Step 2:** Create Dockerfile and Build Image  
-☁️ **Step 3:** Push Image to AWS ECR  
-🌐 **Step 4:** Create AWS VPC  
-⚙️ **Step 5:** Setup AWS EKS using eksctl  
-🚀 **Step 6:** Deploy Application in `dev` Namespace  
-🧱 **Step 7:** Install Nginx Ingress  
-🔐 **Step 8:** Install Let’s Encrypt and Cert Manager  
-🌍 **Step 9:** Configure DNS for Application Access
+**Step 1:** Create a Sample Application  
+**Step 2:** Create Dockerfile and Build Image  
+**Step 3:** Push Image to AWS ECR  
+**Step 4:** Create AWS VPC  
+**Step 5:** Setup AWS EKS using eksctl  
+**Step 6:** Deploy Application in `dev` Namespace  
+**Step 7:** Install Nginx Ingress  
+**Step 8:** Install Let’s Encrypt and Cert Manager  
+**Step 9:** Configure DNS for Application Access
+
+### 🚀 Deployment Steps
+
+1️⃣ **Create a Sample Application**  
+2️⃣ **Create Dockerfile**  
+3️⃣ **Build the Container Image**  
+4️⃣ **Push Image to AWS ECR (Elastic Container Registry)**  
+5️⃣ **Create AWS VPC (Networking Layer)**  
+6️⃣ **Provision AWS EKS Cluster using `eksctl`**  
+7️⃣ **Deploy the Sample Application in `dev` Namespace**  
+8️⃣ **Install Nginx Ingress Controller**  
+9️⃣ **Install Let’s Encrypt for SSL Certificates**  
+🔟 **Install Cert Manager and Configure DNS to Access the Application**
+
+
+### ✅ DevOps Lab Checklist
+
+- [ ] Create a Sample Application  
+- [ ] Create Dockerfile  
+- [ ] Build Container Image  
+- [ ] Push to AWS ECR  
+- [ ] Create AWS VPC  
+- [ ] Create AWS EKS Cluster using eksctl  
+- [ ] Deploy Application in Namespace `dev`  
+- [ ] Install Nginx Ingress  
+- [ ] Install Let’s Encrypt  
+- [ ] Install Cert Manager  
+- [ ] Configure DNS for Application Access
+
 
 ## Architecture Diagram
 
