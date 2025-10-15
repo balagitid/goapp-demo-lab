@@ -36,12 +36,22 @@ By completing this lab, you will learn how to:
 
 
 
- BalaSubramani  Kuppusamy
- _Cloud Solution Architect | DevOps Engineer | Infrastructure Engineer_
-[https://labs.kubelancer.com](https://labs.kubelancer.com)
+
 
 ## 📫 Get in Touch
 
-- Website / Labs: [labs.kubelancer.com](https://labs.kubelancer.com)  
-- LinkedIn: *(add your LinkedIn URL)*  
-- Email: *(your email)*  
+-  BalaSubramani  Kuppusamy
+-  _Cloud Solution Architect | DevOps Engineer | Infrastructure Engineer_
+
+## For Business:
+
+- 30 mins Free Consulting [https://calendly.com/bala-kubelancer/30min]
+- Email: *bala@kubelancer.com*
+
+## Social Links
+
+- Blog: https://bala-kubelancer.medium.com/
+- Labs: [labs.kubelancer.com](https://labs.kubelancer.com)
+- Website: [labs.kubelancer.com](https://labs.kubelancer.com)  
+- LinkedIn: *www.linkedin.com/in/bala-kubelancer*  
+- X: *https://x.com/bala_kubelancer*
