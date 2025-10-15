@@ -8,8 +8,9 @@ A hands-on project that demonstrates how to deploy simple application in AWS EKS
 - **Application:** Simple Go Application
 
 **>** Step by Step 
-- [x] Done
-- [ ] [title](url)
+- [*] Hello
+- [#] Bala
+      
 
 [title](url) 
 
