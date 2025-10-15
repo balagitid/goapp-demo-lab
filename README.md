@@ -70,6 +70,14 @@ A hands-on project that demonstrates how to deploy simple application in AWS EKS
 
 Support:
 
+### 📫 Get in Touch
+👨‍💻 **Bala Subramani Kuppusamy** — Cloud Solution Architect | DevOps Engineer | Infrastructure Engineer  
+📞 [Schedule a Free 30-Minute Call](https://calendly.com/bala-kubelancer/30min)  
+🌐 [bala.kubelancer.com](https://bala.kubelancer.com)  
+✉️ [bala@kubelancer.com](mailto:bala@kubelancer.com)  
+💼 [LinkedIn](https://linkedin.com/in/bala-kubelancer)  
+📍 Bangalore, India
+
 
 
 
