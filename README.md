@@ -22,6 +22,17 @@ A hands-on project that demonstrates how to deploy simple application in AWS EKS
 - Install Cert Manager
 - Configure DNS to access the Application 
 
+### 🧭 Deployment Flow
+
+⏱️ **Step 1:** Create a Sample Application  
+📦 **Step 2:** Create Dockerfile and Build Image  
+☁️ **Step 3:** Push Image to AWS ECR  
+🌐 **Step 4:** Create AWS VPC  
+⚙️ **Step 5:** Setup AWS EKS using eksctl  
+🚀 **Step 6:** Deploy Application in `dev` Namespace  
+🧱 **Step 7:** Install Nginx Ingress  
+🔐 **Step 8:** Install Let’s Encrypt and Cert Manager  
+🌍 **Step 9:** Configure DNS for Application Access
 
 ## Architecture Diagram
 
