@@ -12,7 +12,7 @@ A hands-on project that demonstrates how to deploy simple application in AWS EKS
 - [#] Bala
       
 
-[title](url) 
+
 
 ## Learning Objectives
 
@@ -36,6 +36,7 @@ By completing this lab, you will learn how to:
 
 
 
-**Author:** BalaSubramani  Kuppusamy
+ BalaSubramani  Kuppusamy
 _Cloud Solution Architect | DevOps Engineer | Infrastructure Engineer_
-**Website:** [https://labs.kubelancer.com](https://labs.kubelancer.com)
+[www.kubelancer.com](url) 
+[https://labs.kubelancer.com](https://labs.kubelancer.com)
