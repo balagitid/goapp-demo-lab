@@ -1,13 +1,17 @@
-# DevOps Lab: Deploy Simple Application in AWS EKS Kubernetes Cluster ( Manual - using CLI tools)
+# Deploy Simple Application in AWS EKS Kubernetes Cluster ( Manual - using CLI tools)
 
 ##  Overview
 
-Welcome to the **DevOps Lab Demo** — a hands-on project that demonstrates how to deploy simple application in AWS EKS cluster using the following stack:
+A hands-on project that demonstrates how to deploy simple application in AWS EKS Kubernetes cluster using the following stack:
 
 - **Infrastructure:** AWS Cloud
 - **Application:** Simple Go Application
 
----
+**>** Step by Step 
+- [x] Done
+- [ ] [title](url)
+
+[title](url) 
 
 ## Learning Objectives
 
@@ -25,6 +29,12 @@ By completing this lab, you will learn how to:
 - Install Cert Manager
 - Configure DNS to access the Application 
 
----
+
 
 ## Architecture Diagram
+
+
+
+**Author:** BalaSubramani  Kuppusamy
+**_text_** Cloud Solution Architect | DevOps Engineer | Infrastructure Engineer
+**Website:** [https://labs.kubelancer.com](https://labs.kubelancer.com)
