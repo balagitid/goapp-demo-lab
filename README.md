@@ -38,5 +38,5 @@ By completing this lab, you will learn how to:
 
  BalaSubramani  Kuppusamy
 _Cloud Solution Architect | DevOps Engineer | Infrastructure Engineer_
-[www.kubelancer.com](url) 
+
 [https://labs.kubelancer.com](https://labs.kubelancer.com)
