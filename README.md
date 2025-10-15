@@ -7,9 +7,11 @@ A hands-on project that demonstrates how to deploy simple application in AWS EKS
 - **Infrastructure:** AWS Cloud
 - **Application:** Simple Go Application
 
-**>** Step by Step 
+> Step by Step
+> Lab
+
 - [x] Hello
-- [#] Bala
+
       
 
 
